@@ -1,16 +1,16 @@
-package com.pluralsight.ui;
+package com.pluralsight.Views;
 
 import com.pluralsight.Model.*;
 import com.pluralsight.Services.ContractFileManager;
 import com.pluralsight.Services.FileManager;
+import com.pluralsight.Services.MySqlContractDao;
+import com.pluralsight.Services.MySqlVehiclesDao;
+import com.pluralsight.controllers.VehiclesController;
 
+import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.FormatFlagsConversionMismatchException;
-import java.util.InputMismatchException;
-import java.util.Scanner;
-import java.util.stream.Collectors;
+import java.util.*;
 
 
 public class UserInterface {
@@ -22,10 +22,14 @@ public class UserInterface {
     String colorTitle = "Color";
     String odometerTitle = "Odometer";
     String priceTitle = "Price";
+
+    DataSource dataSource;
+    VehiclesController vehiclesController;
     private static Scanner userInput = new Scanner(System.in);
 
-    public UserInterface()
+    public UserInterface(VehiclesController vehiclesController)
     {
+        this.vehiclesController = vehiclesController;
     }
 
     public void run()
@@ -126,9 +130,9 @@ public class UserInterface {
         System.out.println("-------------------------------------------All vehicles---------------------------------------------");
         System.out.printf(" %-10s | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s \n", vinTitle, yearTitle, makeTitle, modelTitle, typeTitle, colorTitle, odometerTitle, priceTitle);
         System.out.println("-".repeat(100));
-        for (Vehicle vehicle : dealerShip.getAllVehicles())
+        for (Vehicle vehicle : vehiclesController.getAllVehicles())
         {
-            System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+            System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
             System.out.println("-".repeat(100));
         }
     }
@@ -170,7 +174,7 @@ public class UserInterface {
 
             // adding vehicle to dealership
             Vehicle vehicle = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
-            dealerShip.addVehicle(vehicle);
+            vehiclesController.addVehicle(vehicle);
 
             System.out.println();
             System.out.println(vehicle.getMake() + " " + vehicle.getModel() + " added to inventory");
@@ -204,19 +208,8 @@ public class UserInterface {
             vin = userInput.nextInt();
             userInput.nextLine();
 
-            ArrayList<Vehicle> allVehicles = dealerShip.getAllVehicles();
+            vehiclesController.removeVehicle(vin);
 
-            for (int i = 0; i < allVehicles.size(); i++)
-            {
-                Vehicle vehicle = allVehicles.get(i);
-                if(vehicle.getVin() == vin)
-                {
-                    // removing vehicle from inventory
-                    dealerShip.removeVehicle(vehicle);
-                    System.out.println();
-                    System.out.println(vehicle.getMake() + " " + vehicle.getModel() + " removed from inventory");
-                }
-            }
 
         }
         catch (FormatFlagsConversionMismatchException e)
@@ -250,7 +243,7 @@ public class UserInterface {
             userInput.nextLine();
 
             // searching in my dealership inventory and displaying it on the screen
-            ArrayList<Vehicle> priceRangeVehicles = dealerShip.getVehicleByPriceRange(minPrice, maxPrice);
+            List<Vehicle> priceRangeVehicles = vehiclesController.getVehiclesByPriceRange(minPrice, maxPrice);
 
             // displaying vehicles
             System.out.println();
@@ -259,7 +252,7 @@ public class UserInterface {
             System.out.println("-".repeat(100));
             for(Vehicle vehicle : priceRangeVehicles)
             {
-                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
                 System.out.println("-".repeat(100));
             }
             if(priceRangeVehicles.isEmpty())
@@ -293,7 +286,7 @@ public class UserInterface {
             String model = userInput.nextLine().strip();
 
             // filtering and adding the vehicle that match input make and model to the arrayList
-            ArrayList<Vehicle> vehiclesByMakeAndModel = dealerShip.getVehiclesByMakeAndModel(make, model);
+            List<Vehicle> vehiclesByMakeAndModel = vehiclesController.getVehiclesByMakeModel(make, model);
 
             // displaying vehicles
             System.out.println("-----------------------------------------Vehicles by model name------------------------------------");
@@ -301,7 +294,7 @@ public class UserInterface {
             System.out.println("-".repeat(100));
             for(Vehicle vehicle : vehiclesByMakeAndModel)
             {
-                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
                 System.out.println("-".repeat(100));
             }
 
@@ -337,7 +330,7 @@ public class UserInterface {
             userInput.nextLine();
 
             // getting all the vehicles with in that year range
-            ArrayList<Vehicle> vehiclesByYearRange = dealerShip.getVehiclesByYearRange(startYear, endYear);
+            List<Vehicle> vehiclesByYearRange = vehiclesController.getVehiclesByYearRange(startYear, endYear);
 
             //displaying the vehicles
             System.out.println();
@@ -346,7 +339,7 @@ public class UserInterface {
             System.out.println("-".repeat(100));
             for(Vehicle vehicle : vehiclesByYearRange)
             {
-                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
                 System.out.println("-".repeat(100));
             }
 
@@ -378,7 +371,7 @@ public class UserInterface {
             String color = userInput.nextLine();
 
             // filtering and checking if the vehicles color is equal to the color provided
-            ArrayList<Vehicle> vehiclesByColor = dealerShip.getVehiclesByColor(color);
+            List<Vehicle> vehiclesByColor = vehiclesController.getVehicleByColor(color);
 
             // displaying vehicles
             System.out.println();
@@ -387,7 +380,7 @@ public class UserInterface {
             System.out.println("-".repeat(100));
             for(Vehicle vehicle : vehiclesByColor)
             {
-                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
                 System.out.println("-".repeat(100));
             }
 
@@ -420,7 +413,7 @@ public class UserInterface {
         userInput.nextLine();
 
         // filtering and checking if vehicles mileage is in between what the user provided
-        ArrayList<Vehicle> vehiclesByMileRange = dealerShip.getVehicleByMileageRange(startingMileage, endingMileage);
+        List<Vehicle> vehiclesByMileRange = vehiclesController.getVehicleByMileage(startingMileage, endingMileage);
 
         //displaying vehicles
         System.out.println("------------------------------------------Vehicles by mileage range-------------------------------------");
@@ -428,7 +421,7 @@ public class UserInterface {
         System.out.println("-".repeat(100));
         for (Vehicle vehicle : vehiclesByMileRange)
         {
-            System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+            System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
             System.out.println("-".repeat(100));
         }
 
@@ -448,7 +441,7 @@ public class UserInterface {
             String vehicleType = userInput.nextLine().strip();
 
             // filtering and checking if the vehicle type is equal to what the user provided
-            ArrayList<Vehicle> vehiclesByVehicleType = dealerShip.getVehiclesByType(vehicleType);
+            List<Vehicle> vehiclesByVehicleType = vehiclesController.getVehicleByType(vehicleType);
 
             // displaying vehicles to the screen
             System.out.println("------------------------------------------Vehicles by type---------------------------------------");
@@ -456,7 +449,7 @@ public class UserInterface {
             System.out.println("-".repeat(100));
             for (Vehicle vehicle : vehiclesByVehicleType)
             {
-                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | %.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
+                System.out.printf(" %-10d | %-10d | %-10s | %-10s | %-10s | %-10s | %-10d | $%.2f \n", vehicle.getVin(), vehicle.getYear(), vehicle.getMake(), vehicle.getModel(), vehicle.getVehicleType(), vehicle.getColor(), vehicle.getOdometer(), vehicle.getPrice());
                 System.out.println("-".repeat(100));
             }
 

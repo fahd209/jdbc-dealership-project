@@ -1,4 +1,4 @@
-package com.pluralsight.ui;
+package com.pluralsight.Views;
 
 public class Symbols
 {
