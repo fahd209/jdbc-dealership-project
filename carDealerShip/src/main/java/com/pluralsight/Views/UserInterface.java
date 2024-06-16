@@ -500,11 +500,9 @@ public class UserInterface {
             int vin = Integer.parseInt(userInput.nextLine().strip());
             System.out.print("Would you like to Finance the vehicle (Yes/No): ");
             boolean isFinance = userInput.nextLine().strip().equalsIgnoreCase("yes");
-            System.out.print("AWESOME, Let's go start the paperwork!");
-            System.out.println();
             System.out.println();
 
-            //Search for vehicle in dealership arrayList
+            //Search for vehicle in database
             Vehicle vehicle = vehiclesController.getVehicleByVin(vin);
 
             // checking if the vehicle is found

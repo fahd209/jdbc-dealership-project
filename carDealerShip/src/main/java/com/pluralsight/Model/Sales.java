@@ -20,6 +20,11 @@ public class Sales extends Contract
         return SALES_TAX;
     }
 
+    public Vehicle getVehicle()
+    {
+        return super.getVehicleSold();
+    }
+
     public double getRECORDING_FEE() {
         return RECORDING_FEE;
     }

@@ -20,9 +20,9 @@ public class ContractController {
         contractDao.addLeaseContract(lease);
     }
 
-    public Contract sellVehicle(Contract sale)
+    public void sellVehicle(Contract sale)
     {
-        return sale;
+        contractDao.addSaleContract(sale);
     }
 
 }
