@@ -1,9 +1,7 @@
 package com.pluralsight.Model;
 
-import com.pluralsight.Services.FileManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,14 +1,9 @@
 package com.pluralsight.Views;
 
 import com.pluralsight.Model.*;
-import com.pluralsight.Services.ContractFileManager;
-import com.pluralsight.Services.FileManager;
-import com.pluralsight.Services.MySqlContractDao;
-import com.pluralsight.Services.MySqlVehiclesDao;
 import com.pluralsight.controllers.ContractController;
 import com.pluralsight.controllers.VehiclesController;
 
-import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -223,7 +218,7 @@ public class UserInterface {
 
     }
 
-    public void findVehicleWithPriceRange( )
+    public void findVehicleWithPriceRange()
     {
         try
         {
@@ -537,8 +532,6 @@ public class UserInterface {
             String email = userInput.nextLine().strip();
             System.out.print("Enter the Vin of the Vehicle you would like to purchase: ");
             int vin = Integer.parseInt(userInput.nextLine().strip());
-            System.out.print("AWESOME, Let's go start the paperwork!");
-            System.out.println();
             System.out.println();
 
             //Search for vehicle in dealership arrayList
