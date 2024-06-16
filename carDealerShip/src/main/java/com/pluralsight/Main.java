@@ -1,8 +1,11 @@
 package com.pluralsight;
 
+import com.pluralsight.Services.Daos.ContractDao;
 import com.pluralsight.Services.Daos.VehiclesDao;
+import com.pluralsight.Services.MySqlContractDao;
 import com.pluralsight.Services.MySqlVehiclesDao;
 import com.pluralsight.Views.UserInterface;
+import com.pluralsight.controllers.ContractController;
 import com.pluralsight.controllers.VehiclesController;
 import org.apache.commons.dbcp2.BasicDataSource;
 
@@ -17,8 +20,10 @@ public class Main {
     {
         DataSource dataSource = configDataSource();
         VehiclesDao vehiclesDao = new MySqlVehiclesDao(dataSource);
+        ContractDao contractDao = new MySqlContractDao(dataSource);
         VehiclesController vehiclesController = new VehiclesController(vehiclesDao);
-        UserInterface app = new UserInterface(vehiclesController);
+        ContractController contractController = new ContractController(contractDao);
+        UserInterface app = new UserInterface(vehiclesController, contractController);
         app.run();
     }
 

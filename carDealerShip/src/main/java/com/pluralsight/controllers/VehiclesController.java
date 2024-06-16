@@ -2,7 +2,6 @@ package com.pluralsight.controllers;
 
 import com.pluralsight.Model.Vehicle;
 import com.pluralsight.Services.Daos.VehiclesDao;
-import com.pluralsight.Services.MySqlVehiclesDao;
 
 import java.util.List;
 
@@ -71,5 +70,12 @@ public class VehiclesController {
         List<Vehicle> vehiclesByType = vehiclesDao.getVehicleByType(type);
 
         return vehiclesByType;
+    }
+
+    public Vehicle getVehicleByVin(int vin)
+    {
+        Vehicle vehicle = vehiclesDao.getVehicleByVin(vin);
+
+        return vehicle;
     }
  }

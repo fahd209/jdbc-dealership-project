@@ -37,7 +37,8 @@ public class MySqlVehiclesDao implements VehiclesDao {
                               , V.Price
                             FROM inventory AS I
                             INNER JOIN vehicles AS V
-                                   ON V.Vin_number = I.Vin_number;
+                                   ON V.Vin_number = I.Vin_number
+                            ORDER BY V.Vin_number;
                     """;
 
             Statement statement = connection.createStatement();
@@ -57,7 +58,6 @@ public class MySqlVehiclesDao implements VehiclesDao {
                 Vehicle vehicle = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
                 allVehicles.add(vehicle);
             }
-
         }
         catch (Exception e)
         {
@@ -69,10 +69,9 @@ public class MySqlVehiclesDao implements VehiclesDao {
     @Override
     public void addVehicle(Vehicle vehicle)
     {
-        try(Connection connection = dataSource.getConnection())
-        {
+        try(Connection connection = dataSource.getConnection()) {
             String sql = """
-                    INSERT INTO Vehicles
+                    INSERT INTO vehicles
                     (
                     	Vin_number,
                         year,
@@ -85,7 +84,7 @@ public class MySqlVehiclesDao implements VehiclesDao {
                     	Sold
                     )
                     VALUES
-                    	(?, ? , ? , ? , ? , ? , ? , ? , ?, ?);
+                    	(?, ? , ? , ? , ? , ? , ? , ? , ?);
                     """;
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -98,8 +97,30 @@ public class MySqlVehiclesDao implements VehiclesDao {
             preparedStatement.setInt(7, vehicle.getOdometer());
             preparedStatement.setDouble(8, vehicle.getPrice());
             preparedStatement.setBoolean(9, false);
+            preparedStatement.executeUpdate();
 
-            System.out.println(ColorCodes.GREEN+"Vehicle with vin:" + vehicle.getVin() + " was added"+ColorCodes.RESET);
+            String addToInventorySql = """
+                    INSERT INTO inventory
+                    (
+                    	dealership_id
+                    	, Vin_number
+                    )
+                    VALUES
+                    	(1, ?);
+                    """;
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement(addToInventorySql);
+            preparedStatement1.setInt(1, vehicle.getVin());
+
+            int rowAffected = preparedStatement1.executeUpdate();
+            if (rowAffected > 0)
+            {
+                System.out.println(ColorCodes.GREEN + vehicle.getMake() + " " + vehicle.getModel() + " was added" + ColorCodes.RESET);
+            }
+            else
+            {
+                System.out.println(ColorCodes.RED+ "Failed to add vehicle "+ ColorCodes.RESET);
+            }
 
         }
         catch (Exception e)
@@ -111,21 +132,22 @@ public class MySqlVehiclesDao implements VehiclesDao {
     @Override
     public void removeVehicle(int vinNumber) {
 
-        try(Connection connection = dataSource.getConnection())
-        {
-            String sql =
-                    """
-                    DELETE FROM inventory
-                    WHERE Vin_number = ?;
-                    
+        try(Connection connection = dataSource.getConnection()) {
+            String removingFromVehicleTableSql = """
                     DELETE FROM vehicles
-                    WHERE Vin_number = ?;
+                    WHERE Vin_number = ?
                     """;
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(removingFromVehicleTableSql);
             preparedStatement.setInt(1, vinNumber);
-            preparedStatement.setInt(2, vinNumber);
 
-            System.out.println(ColorCodes.RED+"Vehicle with vin:" + vinNumber + " was removed"+ColorCodes.RESET);
+            int affected = preparedStatement.executeUpdate();
+
+            if (affected > 0) {
+                System.out.println(ColorCodes.GREEN + "Vehicle with vin:" + vinNumber + " was removed" + ColorCodes.RESET);
+            }
+            else{
+                System.out.println(ColorCodes.RED+"Failed to remove vehicle"+ColorCodes.RESET);
+            }
         }
         catch (Exception e)
         {
@@ -152,7 +174,8 @@ public class MySqlVehiclesDao implements VehiclesDao {
                                 FROM inventory AS I
                                 INNER JOIN vehicles AS V
                                 	ON V.Vin_number = I.Vin_number
-                                WHERE price BETWEEN ? AND ?;
+                                WHERE price BETWEEN ? AND ?
+                                ORDER BY V.Price;
                     """;
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -201,7 +224,8 @@ public class MySqlVehiclesDao implements VehiclesDao {
                                 FROM inventory AS I
                                 INNER JOIN vehicles AS V
                                 	ON V.Vin_number = I.Vin_number
-                                WHERE V.make = ? AND V.model = ?;
+                                WHERE V.make = ? AND V.model = ?
+                                ORDER BY V.Vin_number;
                     """;
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -299,7 +323,8 @@ public class MySqlVehiclesDao implements VehiclesDao {
                                 FROM inventory AS I
                                 INNER JOIN vehicles AS V
                                 	ON V.Vin_number = I.Vin_number
-                                WHERE V.Color = ?;
+                                WHERE V.Color = ?
+                                ORDER BY V.Vin_number;
                     """;
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -395,7 +420,8 @@ public class MySqlVehiclesDao implements VehiclesDao {
                                 FROM inventory AS I
                                 INNER JOIN vehicles AS V
                                 	ON V.Vin_number = I.Vin_number
-                                WHERE V.VehicleType = ?;
+                                WHERE V.VehicleType = ?
+                                ORDER BY V.Vin_number;
                     """;
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -422,5 +448,55 @@ public class MySqlVehiclesDao implements VehiclesDao {
             System.out.println(e);
         }
         return vehiclesByMileageRange;
+    }
+
+    public Vehicle getVehicleByVin(int vin)
+    {
+        Vehicle vehicle = null;
+        try(Connection connection = dataSource.getConnection())
+        {
+            String sqlGetVehicleByVin = """
+                    SELECT V.Vin_number
+                           , V.year
+                           , V.make
+                           , V.model
+                           , V.VehicleType
+                           , V.Color
+                           , V.Odometer
+                           , V.Price
+                    FROM inventory AS I
+                    INNER JOIN vehicles AS V
+                                	ON V.Vin_number = I.Vin_number
+                    WHERE V.Vin_number = ?;
+                    """;
+
+            PreparedStatement statement = connection.prepareStatement(sqlGetVehicleByVin);
+            statement.setInt(1, vin);
+            ResultSet row = statement.executeQuery();
+
+            if (row.next())
+            {
+                int vehicleVin = row.getInt("V.Vin_number");
+                int year = row.getInt("V.year");
+                String vehicleMake = row.getString("V.make");
+                String vehicleModel = row.getString("V.model");
+                String Type = row.getString("VehicleType");
+                String vehicleColor = row.getString("V.Color");
+                int odometer = row.getInt("V.Odometer");
+                double price = row.getDouble("V.price");
+                vehicle = new Vehicle(vehicleVin, year, vehicleMake, vehicleModel, Type, vehicleColor, odometer, price);
+                return vehicle;
+            }
+            else
+            {
+                System.out.println(ColorCodes.RED+"No vehicles found"+ColorCodes.RESET);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        return null;
     }
 }

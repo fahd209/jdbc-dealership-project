@@ -5,6 +5,7 @@ import com.pluralsight.Services.ContractFileManager;
 import com.pluralsight.Services.FileManager;
 import com.pluralsight.Services.MySqlContractDao;
 import com.pluralsight.Services.MySqlVehiclesDao;
+import com.pluralsight.controllers.ContractController;
 import com.pluralsight.controllers.VehiclesController;
 
 import javax.sql.DataSource;
@@ -23,23 +24,24 @@ public class UserInterface {
     String odometerTitle = "Odometer";
     String priceTitle = "Price";
 
-    DataSource dataSource;
     VehiclesController vehiclesController;
+    ContractController contractController;
+
     private static Scanner userInput = new Scanner(System.in);
 
-    public UserInterface(VehiclesController vehiclesController)
+    public UserInterface(VehiclesController vehiclesController, ContractController contractController)
     {
         this.vehiclesController = vehiclesController;
+        this.contractController = contractController;
     }
 
     public void run()
     {
-        DealerShip dealerShip = FileManager.getDealership();
-        display(dealerShip);
+        display();
     }
 
     // displaying menu
-    public void display(DealerShip dealerShip)
+    public void display()
     {
         System.out.println("----------------Year Ups dealer ship----------------");
         String input = "";
@@ -65,39 +67,37 @@ public class UserInterface {
                 switch (choice)
                 {
                     case 1:
-                        displayAllVehicles(dealerShip);
+                        displayAllVehicles();
                         break;
                     case 2:
-                        addVehicle(dealerShip);
+                        addVehicle();
                         break;
                     case 3:
-                        removeVehicle(dealerShip);
+                        removeVehicle();
                         break;
                     case 4:
-                        findVehicleWithPriceRange(dealerShip);
+                        findVehicleWithPriceRange();
                         break;
                     case 5:
-                        findVehiclesByMakeAndModel(dealerShip);
+                        findVehiclesByMakeAndModel();
                         break;
                     case 6:
-                        findByYearRange(dealerShip);
+                        findByYearRange();
                         break;
                     case 7:
-                        findVehiclesByColor(dealerShip);
+                        findVehiclesByColor();
                         break;
                     case 8:
-                        findVehiclesByMileageRange(dealerShip);
+                        findVehiclesByMileageRange();
                         break;
                     case 9:
-                        findVehicleByType(dealerShip);
+                        findVehicleByType();
                         break;
                     case 10:
-                        leaseOrBuyVehicle(dealerShip);
+                        leaseOrBuyVehicle();
                         break;
                     case 0:
                         System.out.println();
-                        FileManager.saveDealerShip(dealerShip);
-                        ContractFileManager.saveContract(dealerShip);
                         System.out.println("Good bye :)");
                         break;
                     default:
@@ -124,7 +124,7 @@ public class UserInterface {
         }
     }
 
-    private void displayAllVehicles(DealerShip dealerShip)
+    private void displayAllVehicles()
     {
         System.out.println();
         System.out.println("-------------------------------------------All vehicles---------------------------------------------");
@@ -137,7 +137,7 @@ public class UserInterface {
         }
     }
 
-    public void addVehicle(DealerShip dealerShip)
+    public void addVehicle( )
     {
         // getting new vehicles info
         try {
@@ -175,9 +175,6 @@ public class UserInterface {
             // adding vehicle to dealership
             Vehicle vehicle = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
             vehiclesController.addVehicle(vehicle);
-
-            System.out.println();
-            System.out.println(vehicle.getMake() + " " + vehicle.getModel() + " added to inventory");
         }
         catch (NumberFormatException e)
         {
@@ -197,7 +194,7 @@ public class UserInterface {
 
     }
 
-    public void removeVehicle(DealerShip dealerShip)
+    public void removeVehicle()
     {
         // getting vehicle vin
         int vin = 0;
@@ -209,8 +206,6 @@ public class UserInterface {
             userInput.nextLine();
 
             vehiclesController.removeVehicle(vin);
-
-
         }
         catch (FormatFlagsConversionMismatchException e)
         {
@@ -228,7 +223,7 @@ public class UserInterface {
 
     }
 
-    public void findVehicleWithPriceRange(DealerShip dealerShip)
+    public void findVehicleWithPriceRange( )
     {
         try
         {
@@ -273,7 +268,7 @@ public class UserInterface {
         }
     }
 
-    public void findVehiclesByMakeAndModel(DealerShip dealerShip)
+    public void findVehiclesByMakeAndModel()
     {
         // prompting user for make and model
         try
@@ -316,7 +311,7 @@ public class UserInterface {
         }
     }
 
-    public void findByYearRange(DealerShip dealerShip)
+    public void findByYearRange()
     {
         try
         {
@@ -361,7 +356,7 @@ public class UserInterface {
         }
     }
 
-    public void findVehiclesByColor(DealerShip dealerShip)
+    public void findVehiclesByColor()
     {
         try
         {
@@ -401,7 +396,7 @@ public class UserInterface {
         }
     }
 
-    public void findVehiclesByMileageRange(DealerShip dealerShip)
+    public void findVehiclesByMileageRange()
     {
         // prompting user for input
         System.out.println();
@@ -431,7 +426,7 @@ public class UserInterface {
         }
     }
 
-    public void findVehicleByType(DealerShip dealerShip)
+    public void findVehicleByType()
     {
         try
         {
@@ -468,7 +463,7 @@ public class UserInterface {
         }
     }
 
-    public void leaseOrBuyVehicle(DealerShip dealerShip)
+    public void leaseOrBuyVehicle( )
     {
         // prompting user to buy or lease
         System.out.println();
@@ -480,16 +475,16 @@ public class UserInterface {
         switch (choice)
         {
             case 1:
-                buyVehicle(dealerShip);
+                buyVehicle();
                 break;
             case 2:
-                leaseVehicle(dealerShip);
+                leaseVehicle();
                 break;
             case 3:
                 break;
         }
     }
-    public void buyVehicle(DealerShip dealerShip)
+    public void buyVehicle()
     {
         // prompting user for info and searching for vehicle with vin number
         try {
@@ -510,12 +505,13 @@ public class UserInterface {
             System.out.println();
 
             //Search for vehicle in dealership arrayList
-            Vehicle vehicle = dealerShip.getVehicleByVinNumber(vin);
-            Contract sale = new Sales(date, name, email, vehicle, isFinance);
-            dealerShip.addContract(sale);
-            dealerShip.removeVehicle(vehicle);
-            System.out.println();
-            System.out.println(vehicle.getMake() + " " + vehicle.getModel() + " Vin:" + vehicle.getVin() + "| was sold to " + name);
+            Vehicle vehicle = vehiclesController.getVehicleByVin(vin);
+
+            // checking if the vehicle is found
+            if(vehicle != null) {
+                Contract sale = new Sales(date, name, email, vehicle, isFinance);
+                contractController.sellVehicle(sale);
+            }
         }
         catch (NumberFormatException e)
         {
@@ -529,7 +525,7 @@ public class UserInterface {
         }
     }
 
-    public void leaseVehicle(DealerShip dealerShip)
+    public void leaseVehicle()
     {
         // prompting user for info and searching for vehicle with vin number
         try {
@@ -548,12 +544,15 @@ public class UserInterface {
             System.out.println();
 
             //Search for vehicle in dealership arrayList
-            Vehicle vehicle = dealerShip.getVehicleByVinNumber(vin);
-            Contract lease = new Lease(date, name, email, vehicle);
-            dealerShip.addContract(lease);
-            dealerShip.removeVehicle(vehicle);
-            System.out.println();
-            System.out.println(vehicle.getMake() + " " + vehicle.getModel() + " Vin:" + vehicle.getVin() + "| was leased to " + name);
+            Vehicle vehicle = vehiclesController.getVehicleByVin(vin);
+            if(vehicle != null) {
+                Contract lease = new Lease(date, name, email, vehicle);
+                contractController.leaseVehicle(lease);
+            }
+            else
+            {
+                System.out.println("Vehicle not found");
+            }
         }
         catch (NumberFormatException e)
         {

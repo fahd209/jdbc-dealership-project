@@ -13,9 +13,15 @@ public class Lease extends Contract
         this.LEASE_FEE = vehicleSold.getPrice() * .07;
     }
 
+
     public double getExpectedEndingValue()
     {
         return expectedEndingValue;
+    }
+
+    @Override
+    public Vehicle getVehicleSold() {
+        return super.getVehicleSold();
     }
 
     public double getLEASE_FEE()

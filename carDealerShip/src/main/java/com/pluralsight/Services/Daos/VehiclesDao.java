@@ -21,4 +21,6 @@ public interface VehiclesDao {
     List<Vehicle> getVehicleByMileageRange(int startMileage, int endMileage);
 
     List<Vehicle> getVehicleByType(String vehicleType);
+
+    Vehicle getVehicleByVin(int vin);
 }

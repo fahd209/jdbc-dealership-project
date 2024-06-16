@@ -1,5 +1,7 @@
 package com.pluralsight.Model;
 
+import java.util.Date;
+
 public abstract class Contract {
     private String date;
     private String customerName;

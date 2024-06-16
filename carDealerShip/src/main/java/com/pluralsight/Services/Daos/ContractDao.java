@@ -7,9 +7,9 @@ import java.rmi.dgc.Lease;
 import java.util.List;
 
 public interface ContractDao {
-    Lease addLeaseContract();
+    void addLeaseContract(Contract lease);
 
-    Sales addSaleContract();
+    void addSaleContract(Contract sales);
 
     List<Contract> getLeaseContracts();
     List<Contract> getSaleContracts();
