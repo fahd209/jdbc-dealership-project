@@ -1,7 +1,7 @@
 # dealership-application-with-database
 ### Overview of project
 I'm connected my old dealership application that was saving data in a csv file to a database using mySql. In this project I implemented the MVC pattern to split my application into smaller parts. 
-![diagram](images/diagram.png)
+![diagram](images/diagram2.png)
 
 ## Phase 1
 In this phase I added all the search option for the user like search by price range, search by make and model, search by year range, search by color, search by mileage range, search by type using the pattern above.
