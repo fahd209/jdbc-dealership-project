@@ -19,6 +19,8 @@ public class MySqlContractDao implements ContractDao {
         this.dataSource = dataSource;
     }
 
+    // another test comment
+
     @Override
     public void addLeaseContract(Contract contract) {
         try (Connection connection = dataSource.getConnection()) {
