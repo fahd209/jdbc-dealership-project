@@ -37,9 +37,10 @@ public class MySqlContractDao implements ContractDao {
                 if (rowsAffected > 0) {
                     // Vehicle update successful, proceed to insert lease contract
                     String sqlAddLease = """
-                            INSERT INTO lease_contract
-                            "(Customer_name, Customer_email, lease_date, total_price, monthly_Payment, Vin_number, dealership_id) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?)""";
+                        INSERT INTO lease_contract
+                        (Customer_name, Customer_email, lease_date, total_price, monthly_Payment, Vin_number, dealership_id)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """;
 
                     try (PreparedStatement preparedStatement = connection.prepareStatement(sqlAddLease)) {
                         preparedStatement.setString(1, contract.getCustomerName());
