@@ -34,6 +34,7 @@ public class MySqlContractDao implements ContractDao {
                 updateVehicle.setInt(1, vehicle.getVin());
                 int rowsAffected = updateVehicle.executeUpdate();
 
+                // test comment. 
                 if (rowsAffected > 0) {
                     // Vehicle update successful, proceed to insert lease contract
                     String sqlAddLease = """
